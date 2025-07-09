@@ -75,6 +75,12 @@ public class OrganizeTask extends BukkitRunnable {
             // 检查玩家是否仍然有效
             if (!player.isOnline()) {
                 this.cancel();
+                plugin.getLogger().info("玩家 " + player.getName() + " 在整理过程中离线，物品将掉落在原地");
+                for (ItemStack item : itemsToOrganize) {
+                    if (item != null && item.getType() != Material.AIR) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), item);
+                    }
+                }
                 return;
             }
 
@@ -102,6 +108,12 @@ public class OrganizeTask extends BukkitRunnable {
                 List<ItemStack> allItems = new ArrayList<>(itemsToOrganize);
                 allItems.addAll(remainingItems);
                 OrganizeAlgorithm.returnItemsToPlayer(player, allItems);
+            } else {
+                for (ItemStack item : itemsToOrganize) {
+                    if (item != null && item.getType() != Material.AIR) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), item);
+                    }
+                }
             }
 
             this.cancel();
@@ -241,14 +253,15 @@ public class OrganizeTask extends BukkitRunnable {
         if (player.isOnline()) {
             int progress = (finalCurrentIndex * 100) / totalItems;
             plugin.sendMessage(player, plugin.getMsgOrganizingProgress(),
-                "progress", String.valueOf(progress),
-                "current", String.valueOf(finalCurrentIndex),
-                "total", String.valueOf(totalItems));
+                    "progress", String.valueOf(progress),
+                    "current", String.valueOf(finalCurrentIndex),
+                    "total", String.valueOf(totalItems));
         }
 
         // 如果所有物品都处理完了，进入完成阶段
         if (currentItemIndex >= itemsToOrganize.size()) {
             currentPhase = TaskPhase.FINISH;
+            finishOrganizing();
         }
     }
 
@@ -264,9 +277,19 @@ public class OrganizeTask extends BukkitRunnable {
             plugin.sendMessage(player, plugin.getMsgItemsOrganized(), "count", String.valueOf(organizedCount));
 
             if (remainingCount > 0) {
-                plugin.sendMessage(player, plugin.getMsgItemsRemaining(), "count", String.valueOf(remainingCount));
-                // 返回剩余物品给玩家
-                OrganizeAlgorithm.returnItemsToPlayer(player, remainingItems);
+                if (player.isOnline()) {
+                    plugin.sendMessage(player, plugin.getMsgItemsRemaining(), "count", String.valueOf(remainingCount));
+                    // 返回剩余物品给玩家
+                    OrganizeAlgorithm.returnItemsToPlayer(player, remainingItems);
+                } else {
+                    plugin.getLogger().info("玩家 " + player.getName() + " 在整理过程中离线，剩余物品将掉落在原地");
+                    for (ItemStack item : remainingItems) {
+                        if (item != null && item.getType() != Material.AIR) {
+                            player.getWorld().dropItemNaturally(player.getLocation(), item);
+                        }
+                    }
+                }
+
             } else {
                 plugin.sendMessage(player, plugin.getMsgAllItemsOrganized());
             }

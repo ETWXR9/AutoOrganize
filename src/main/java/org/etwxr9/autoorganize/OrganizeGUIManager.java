@@ -39,8 +39,7 @@ public class OrganizeGUIManager implements Listener {
      */
     public void openOrganizeGUI(Player player, BlockPosition pos, int range) {
         // 创建6行54格的物品栏
-        Inventory gui = Bukkit.createInventory(null, InventoryType.CHEST,
-                Component.text(plugin.getMsgGuiTitle()).color(NamedTextColor.GOLD));
+        Inventory gui = Bukkit.createInventory(null, 54, plugin.getMsgGuiTitle());
 
         // 创建整理会话
         OrganizeSession session = new OrganizeSession(player, pos, range, gui);
