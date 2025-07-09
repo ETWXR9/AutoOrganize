@@ -19,12 +19,26 @@ public final class AutoOrganize extends JavaPlugin {
 
     private OrganizeGUIManager guiManager;
 
-    // 配置项
+    // 配置项（从配置文件读取）
     private int blocksPerTick = 300;
-    private int itemsPerTick = 5;
     private boolean visualEffectsEnabled = true;
-    private boolean coreProtectEnabled = true;
-    private boolean locketteProEnabled = true;
+    private int flightDuration = 30;
+    private double itemScale = 0.3;
+
+    // 消息配置
+    private String msgGuiOpen = "";
+    private String msgGuiStartOrganizing = "";
+    private String msgGuiNoItems = "";
+    private String msgSearchContainers = "";
+    private String msgContainersFound = "";
+    private String msgNoContainers = "";
+    private String msgOrganizingProgress = "";
+    private String msgOrganizeComplete = "";
+    private String msgItemsOrganized = "";
+    private String msgItemsRemaining = "";
+    private String msgAllItemsOrganized = "";
+    private String msgErrorOccurred = "";
+    private String msgPlayerOnly = "";
 
     private LocketteProHook locketteProHook;
     private boolean isLocketteProEnabled = false;
@@ -53,20 +67,60 @@ public final class AutoOrganize extends JavaPlugin {
         return blocksPerTick;
     }
 
-    public int getItemsPerTick() {
-        return itemsPerTick;
-    }
-
     public boolean isVisualEffectsEnabled() {
         return visualEffectsEnabled;
     }
 
-    public boolean isCoreProtectConfigEnabled() {
-        return coreProtectEnabled;
+    public int getFlightDuration() {
+        return flightDuration;
     }
 
-    public boolean isLocketteProConfigEnabled() {
-        return locketteProEnabled;
+    public double getItemScale() {
+        return itemScale;
+    }
+
+    // 消息配置getter方法
+    public String getMsgGuiOpen() { return msgGuiOpen; }
+    public String getMsgGuiStartOrganizing() { return msgGuiStartOrganizing; }
+    public String getMsgGuiNoItems() { return msgGuiNoItems; }
+    public String getMsgSearchContainers() { return msgSearchContainers; }
+    public String getMsgContainersFound() { return msgContainersFound; }
+    public String getMsgNoContainers() { return msgNoContainers; }
+    public String getMsgOrganizingProgress() { return msgOrganizingProgress; }
+    public String getMsgOrganizeComplete() { return msgOrganizeComplete; }
+    public String getMsgItemsOrganized() { return msgItemsOrganized; }
+    public String getMsgItemsRemaining() { return msgItemsRemaining; }
+    public String getMsgAllItemsOrganized() { return msgAllItemsOrganized; }
+    public String getMsgErrorOccurred() { return msgErrorOccurred; }
+    public String getMsgPlayerOnly() { return msgPlayerOnly; }
+
+    /**
+     * 发送配置化消息给玩家
+     * @param player 目标玩家
+     * @param message 消息内容
+     */
+    public void sendMessage(Player player, String message) {
+        if (message != null && !message.trim().isEmpty()) {
+            player.sendMessage(message);
+        }
+    }
+
+    /**
+     * 发送带占位符的配置化消息给玩家
+     * @param player 目标玩家
+     * @param message 消息模板
+     * @param placeholders 占位符键值对
+     */
+    public void sendMessage(Player player, String message, String... placeholders) {
+        if (message != null && !message.trim().isEmpty()) {
+            String finalMessage = message;
+            for (int i = 0; i < placeholders.length; i += 2) {
+                if (i + 1 < placeholders.length) {
+                    finalMessage = finalMessage.replace("{" + placeholders[i] + "}", placeholders[i + 1]);
+                }
+            }
+            player.sendMessage(finalMessage);
+        }
     }
 
     @Override
@@ -132,7 +186,9 @@ public final class AutoOrganize extends JavaPlugin {
         // 检查命令发送者是否为玩家
         if (!(ctx.getSource().getSender() instanceof Player)) {
             getLogger().warning("Non-player tried to use /organize command");
-            ctx.getSource().getSender().sendMessage("此命令只能由玩家执行");
+            if (!msgPlayerOnly.trim().isEmpty()) {
+                ctx.getSource().getSender().sendMessage(msgPlayerOnly);
+            }
             return false;
         }
 
@@ -156,12 +212,26 @@ public final class AutoOrganize extends JavaPlugin {
 
         // 读取配置项
         blocksPerTick = getConfig().getInt("performance.blocks_per_tick", 300);
-        itemsPerTick = getConfig().getInt("performance.items_per_tick", 5);
         visualEffectsEnabled = getConfig().getBoolean("visual_effects.enabled", true);
-        coreProtectEnabled = getConfig().getBoolean("integrations.coreprotect.enabled", true);
-        locketteProEnabled = getConfig().getBoolean("integrations.lockettepro.enabled", true);
+        flightDuration = getConfig().getInt("visual_effects.flight_duration", 30);
+        itemScale = getConfig().getDouble("visual_effects.item_scale", 0.3);
 
-        getLogger().info("配置已加载 - 每tick扫描方块数: " + blocksPerTick + ", 每tick处理物品数: " + itemsPerTick);
+        // 读取消息配置
+        msgGuiOpen = getConfig().getString("messages.gui_open", "");
+        msgGuiStartOrganizing = getConfig().getString("messages.gui_start_organizing", "");
+        msgGuiNoItems = getConfig().getString("messages.gui_no_items", "");
+        msgSearchContainers = getConfig().getString("messages.search_containers", "");
+        msgContainersFound = getConfig().getString("messages.containers_found", "");
+        msgNoContainers = getConfig().getString("messages.no_containers", "");
+        msgOrganizingProgress = getConfig().getString("messages.organizing_progress", "");
+        msgOrganizeComplete = getConfig().getString("messages.organize_complete", "");
+        msgItemsOrganized = getConfig().getString("messages.items_organized", "");
+        msgItemsRemaining = getConfig().getString("messages.items_remaining", "");
+        msgAllItemsOrganized = getConfig().getString("messages.all_items_organized", "");
+        msgErrorOccurred = getConfig().getString("messages.error_occurred", "");
+        msgPlayerOnly = getConfig().getString("messages.player_only", "");
+
+        getLogger().info("配置已加载 - 每tick扫描方块数: " + blocksPerTick);
     }
 
     @Override

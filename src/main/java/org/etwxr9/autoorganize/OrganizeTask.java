@@ -36,7 +36,6 @@ public class OrganizeTask extends BukkitRunnable {
 
     // 从配置文件读取的值
     private final int CONTAINERS_SCAN_PER_TICK; // 每tick扫描的方块数量
-    private final int ITEMS_PER_TICK; // 每tick处理的物品数量
 
     // 容器搜索相关变量
     private int scanX, scanY, scanZ;
@@ -62,7 +61,6 @@ public class OrganizeTask extends BukkitRunnable {
 
         // 从配置文件读取性能参数
         this.CONTAINERS_SCAN_PER_TICK = plugin.getBlocksPerTick();
-        this.ITEMS_PER_TICK = plugin.getItemsPerTick();
 
         // 过滤掉空物品
         for (ItemStack item : items) {
@@ -100,7 +98,7 @@ public class OrganizeTask extends BukkitRunnable {
             e.printStackTrace();
 
             if (player.isOnline()) {
-                player.sendMessage("§c整理过程中发生错误，请稍后重试");
+                plugin.sendMessage(player, plugin.getMsgErrorOccurred());
                 // 返回所有物品给玩家
                 List<ItemStack> allItems = new ArrayList<>(itemsToOrganize);
                 allItems.addAll(remainingItems);
@@ -131,13 +129,13 @@ public class OrganizeTask extends BukkitRunnable {
         // 如果扫描完成，进入下一阶段
         if (!hasMoreBlocksToScan()) {
             if (containers.isEmpty()) {
-                player.sendMessage("§c未找到任何容器，物品已返回背包");
+                plugin.sendMessage(player, plugin.getMsgNoContainers());
                 OrganizeAlgorithm.returnItemsToPlayer(player, itemsToOrganize);
                 this.cancel();
                 return;
             }
 
-            player.sendMessage("§a找到 " + containers.size() + " 个容器，开始整理物品...");
+            plugin.sendMessage(player, plugin.getMsgContainersFound(), "count", String.valueOf(containers.size()));
             currentPhase = TaskPhase.ORGANIZE_ITEMS;
         }
     }
@@ -161,7 +159,7 @@ public class OrganizeTask extends BukkitRunnable {
         containers = new ArrayList<>();
         scanInitialized = true;
 
-        player.sendMessage("§e开始搜索容器...");
+        plugin.sendMessage(player, plugin.getMsgSearchContainers());
     }
 
     /**
@@ -215,9 +213,7 @@ public class OrganizeTask extends BukkitRunnable {
         int processedItems = 0;
 
         // 处理当前批次的物品
-        while (currentItemIndex < itemsToOrganize.size() 
-        // && processedItems < ITEMS_PER_TICK
-        ) {
+        while (currentItemIndex < itemsToOrganize.size()) {
             ItemStack currentItem = itemsToOrganize.get(currentItemIndex);
 
             if (currentItem != null && currentItem.getType() != Material.AIR) {
@@ -245,7 +241,10 @@ public class OrganizeTask extends BukkitRunnable {
         final int totalItems = itemsToOrganize.size();
         if (player.isOnline()) {
             int progress = (finalCurrentIndex * 100) / totalItems;
-            player.sendMessage("§e整理进度: " + progress + "% (" + finalCurrentIndex + "/" + totalItems + ")");
+            plugin.sendMessage(player, plugin.getMsgOrganizingProgress(),
+                "progress", String.valueOf(progress),
+                "current", String.valueOf(finalCurrentIndex),
+                "total", String.valueOf(totalItems));
         }
 
         // 如果所有物品都处理完了，进入完成阶段
@@ -262,15 +261,15 @@ public class OrganizeTask extends BukkitRunnable {
             int organizedCount = itemsToOrganize.size() - remainingItems.size();
             int remainingCount = remainingItems.size();
 
-            player.sendMessage("§a整理完成！");
-            player.sendMessage("§a已整理物品: " + organizedCount + " 种");
+            plugin.sendMessage(player, plugin.getMsgOrganizeComplete());
+            plugin.sendMessage(player, plugin.getMsgItemsOrganized(), "count", String.valueOf(organizedCount));
 
             if (remainingCount > 0) {
-                player.sendMessage("§e剩余物品: " + remainingCount + " 种（已返回背包）");
+                plugin.sendMessage(player, plugin.getMsgItemsRemaining(), "count", String.valueOf(remainingCount));
                 // 返回剩余物品给玩家
                 OrganizeAlgorithm.returnItemsToPlayer(player, remainingItems);
             } else {
-                player.sendMessage("§a所有物品都已成功整理！");
+                plugin.sendMessage(player, plugin.getMsgAllItemsOrganized());
             }
         }
 

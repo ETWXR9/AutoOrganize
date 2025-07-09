@@ -5,9 +5,7 @@ import org.bukkit.entity.Display;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
-import org.joml.Vector3f;
 
 /**
  * 物品飞行视觉效果类
@@ -23,7 +21,8 @@ public class ItemFlyingEffect extends BukkitRunnable {
     private final double totalDistance;
     
     private int tickCount = 0;
-    private static final int FLIGHT_DURATION_TICKS = 30; // 飞行持续时间（ticks）
+
+    // 飞行参数
     private static final double DECELERATION_FACTOR = 0.8; // 减速因子
     
     /**
@@ -62,7 +61,7 @@ public class ItemFlyingEffect extends BukkitRunnable {
         // itemDisplay.setDisplayWidth(0.3f);
         // itemDisplay.setDisplayHeight(0.3f);
         var t = itemDisplay.getTransformation();
-        t.getScale().set(0.3f);
+        t.getScale().set(plugin.getItemScale());
         itemDisplay.setTransformation(t);
         
         // 设置发光效果
@@ -86,13 +85,13 @@ public class ItemFlyingEffect extends BukkitRunnable {
         tickCount++;
         
         // 检查是否到达目标或超时
-        if (tickCount >= FLIGHT_DURATION_TICKS) {
+        if (tickCount >= plugin.getFlightDuration()) {
             finishFlying();
             return;
         }
         
         // 计算当前进度（0.0 到 1.0）
-        double progress = (double) tickCount / FLIGHT_DURATION_TICKS;
+        double progress = (double) tickCount / plugin.getFlightDuration();
         
         // 应用减速曲线（缓出效果）
         double easedProgress = applyEaseOutCurve(progress);
