@@ -1,0 +1,35 @@
+# AutoOrganize 插件配置文件
+
+# 性能设置
+performance:
+  # 每tick扫描的方块数量（容器搜索阶段）
+  blocks_per_tick: 300
+  # 每tick处理的物品数量（整理阶段）
+  items_per_tick: 5
+
+# 视觉效果设置
+visual_effects:
+  # 是否启用物品飞行动画
+  enabled: true
+  # 飞行持续时间（tick）
+  flight_duration: 30
+  # 物品缩放大小
+  item_scale: 0.3
+
+# 插件集成设置
+integrations:
+  # CoreProtect集成
+  coreprotect:
+    # 是否启用CoreProtect记录
+    enabled: true
+  # LockettePro集成
+  lockettepro:
+    # 是否启用权限检查
+    enabled: true
+
+# 调试设置
+debug:
+  # 是否启用调试模式
+  enabled: false
+  # 是否显示详细日志
+  verbose_logging: false
