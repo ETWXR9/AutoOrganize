@@ -24,6 +24,7 @@ public class OrganizeTask extends BukkitRunnable {
     private final Player player;
     private final Location loc;
     private final int range;
+    private final int yRadius;
     private final List<ItemStack> itemsToOrganize;
 
     private List<OrganizeAlgorithm.ContainerInfo> containers;
@@ -34,7 +35,7 @@ public class OrganizeTask extends BukkitRunnable {
     private TaskPhase currentPhase = TaskPhase.FIND_CONTAINERS;
 
     // 从配置文件读取的值
-    private final int CONTAINERS_SCAN_PER_TICK; // 每tick扫描的方块数量
+    private final int BLOCKS_SCAN_PER_TICK; // 每tick扫描的方块数量
 
     // 容器搜索相关变量
     private int scanX, scanY, scanZ;
@@ -55,11 +56,12 @@ public class OrganizeTask extends BukkitRunnable {
         this.player = player;
         this.loc = pos.toLocation(player.getWorld());
         this.range = range;
+        this.yRadius = plugin.getBlockCombinationConfig().getYRadius();
         this.itemsToOrganize = new ArrayList<>();
         this.remainingItems = new ArrayList<>();
 
         // 从配置文件读取性能参数
-        this.CONTAINERS_SCAN_PER_TICK = plugin.getBlocksPerTick();
+        this.BLOCKS_SCAN_PER_TICK = plugin.getBlocksPerTick();
 
         // 过滤掉空物品
         for (ItemStack item : items) {
@@ -107,7 +109,7 @@ public class OrganizeTask extends BukkitRunnable {
                 // 返回所有物品给玩家
                 List<ItemStack> allItems = new ArrayList<>(itemsToOrganize);
                 allItems.addAll(remainingItems);
-                OrganizeAlgorithm.returnItemsToPlayer(player, allItems);
+                OrganizeAlgorithm.returnItemsToPlayer(player, allItems, plugin);
             } else {
                 for (ItemStack item : itemsToOrganize) {
                     if (item != null && item.getType() != Material.AIR) {
@@ -131,7 +133,7 @@ public class OrganizeTask extends BukkitRunnable {
 
         // 分批扫描方块
         int scannedBlocks = 0;
-        while (scannedBlocks < CONTAINERS_SCAN_PER_TICK && hasMoreBlocksToScan()) {
+        while (scannedBlocks < BLOCKS_SCAN_PER_TICK && hasMoreBlocksToScan()) {
             scanCurrentBlock();
             moveToNextBlock();
             scannedBlocks++;
@@ -141,7 +143,7 @@ public class OrganizeTask extends BukkitRunnable {
         if (!hasMoreBlocksToScan()) {
             if (containers.isEmpty()) {
                 plugin.sendMessage(player, plugin.getMsgNoContainers());
-                OrganizeAlgorithm.returnItemsToPlayer(player, itemsToOrganize);
+                OrganizeAlgorithm.returnItemsToPlayer(player, itemsToOrganize, plugin);
                 this.cancel();
                 return;
             }
@@ -157,10 +159,10 @@ public class OrganizeTask extends BukkitRunnable {
     private void initializeScan() {
         Location center = loc;
         minX = center.getBlockX() - range;
-        minY = Math.max(center.getBlockY() - range, center.getWorld().getMinHeight());
+        minY = Math.max(center.getBlockY() - yRadius, center.getWorld().getMinHeight());
         minZ = center.getBlockZ() - range;
         maxX = center.getBlockX() + range;
-        maxY = Math.min(center.getBlockY() + range, center.getWorld().getMaxHeight());
+        maxY = Math.min(center.getBlockY() + yRadius, center.getWorld().getMaxHeight());
         maxZ = center.getBlockZ() + range;
 
         scanX = minX;
@@ -170,7 +172,12 @@ public class OrganizeTask extends BukkitRunnable {
         containers = new ArrayList<>();
         scanInitialized = true;
 
-        plugin.sendMessage(player, plugin.getMsgSearchContainers());
+        // 计算预计tick数并发送消息
+        long totalBlocks = (long) (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
+        long estimatedTicks = (totalBlocks + BLOCKS_SCAN_PER_TICK - 1) / BLOCKS_SCAN_PER_TICK; // 向上取整
+
+        plugin.sendMessage(player,
+                plugin.getMsgSearchContainers().replace("{estimated_ticks}", String.valueOf(estimatedTicks)));
     }
 
     /**
@@ -280,7 +287,7 @@ public class OrganizeTask extends BukkitRunnable {
                 if (player.isOnline()) {
                     plugin.sendMessage(player, plugin.getMsgItemsRemaining(), "count", String.valueOf(remainingCount));
                     // 返回剩余物品给玩家
-                    OrganizeAlgorithm.returnItemsToPlayer(player, remainingItems);
+                    OrganizeAlgorithm.returnItemsToPlayer(player, remainingItems, plugin);
                 } else {
                     plugin.getLogger().info("玩家 " + player.getName() + " 在整理过程中离线，剩余物品将掉落在原地");
                     for (ItemStack item : remainingItems) {

@@ -18,6 +18,7 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 public final class AutoOrganize extends JavaPlugin {
 
     private OrganizeGUIManager guiManager;
+    private BlockCombinationConfig blockCombinationConfig;
 
     // 配置项（从配置文件读取）
     private int blocksPerTick = 300;
@@ -37,6 +38,7 @@ public final class AutoOrganize extends JavaPlugin {
     private String msgOrganizeComplete = "";
     private String msgItemsOrganized = "";
     private String msgItemsRemaining = "";
+    private String msgItemsDrop = "";
     private String msgAllItemsOrganized = "";
     private String msgErrorOccurred = "";
     private String msgPlayerOnly = "";
@@ -63,9 +65,21 @@ public final class AutoOrganize extends JavaPlugin {
         return coHook;
     }
 
+    public BlockCombinationConfig getBlockCombinationConfig() {
+        return blockCombinationConfig;
+    }
+
+    public OrganizeGUIManager getGuiManager() {
+        return guiManager;
+    }
+
     // 配置项getter方法
     public int getBlocksPerTick() {
         return blocksPerTick;
+    }
+
+    public void setBlocksPerTick(int blocksPerTick2) {
+        this.blocksPerTick = blocksPerTick2;
     }
 
     public boolean isVisualEffectsEnabled() {
@@ -76,29 +90,83 @@ public final class AutoOrganize extends JavaPlugin {
         return flightDuration;
     }
 
+    public void setFlightDuration(int flightDuration2) {
+        this.flightDuration = flightDuration2;
+    }
+
     public double getItemScale() {
         return itemScale;
     }
 
+    public void setItemScale(double itemScale2) {
+        this.itemScale = itemScale2;
+    }
+
     // 消息配置getter方法
-    public String getMsgGuiTitle() { return msgGuiTitle; }
-    public String getMsgGuiOpen() { return msgGuiOpen; }
-    public String getMsgGuiStartOrganizing() { return msgGuiStartOrganizing; }
-    public String getMsgGuiNoItems() { return msgGuiNoItems; }
-    public String getMsgSearchContainers() { return msgSearchContainers; }
-    public String getMsgContainersFound() { return msgContainersFound; }
-    public String getMsgNoContainers() { return msgNoContainers; }
-    public String getMsgOrganizingProgress() { return msgOrganizingProgress; }
-    public String getMsgOrganizeComplete() { return msgOrganizeComplete; }
-    public String getMsgItemsOrganized() { return msgItemsOrganized; }
-    public String getMsgItemsRemaining() { return msgItemsRemaining; }
-    public String getMsgAllItemsOrganized() { return msgAllItemsOrganized; }
-    public String getMsgErrorOccurred() { return msgErrorOccurred; }
-    public String getMsgPlayerOnly() { return msgPlayerOnly; }
+    public String getMsgGuiTitle() {
+        return msgGuiTitle;
+    }
+
+    public String getMsgGuiOpen() {
+        return msgGuiOpen;
+    }
+
+    public String getMsgGuiStartOrganizing() {
+        return msgGuiStartOrganizing;
+    }
+
+    public String getMsgGuiNoItems() {
+        return msgGuiNoItems;
+    }
+
+    public String getMsgSearchContainers() {
+        return msgSearchContainers;
+    }
+
+    public String getMsgContainersFound() {
+        return msgContainersFound;
+    }
+
+    public String getMsgNoContainers() {
+        return msgNoContainers;
+    }
+
+    public String getMsgOrganizingProgress() {
+        return msgOrganizingProgress;
+    }
+
+    public String getMsgOrganizeComplete() {
+        return msgOrganizeComplete;
+    }
+
+    public String getMsgItemsDrop() {
+        return msgItemsDrop;
+    }
+
+    public String getMsgItemsOrganized() {
+        return msgItemsOrganized;
+    }
+
+    public String getMsgItemsRemaining() {
+        return msgItemsRemaining;
+    }
+
+    public String getMsgAllItemsOrganized() {
+        return msgAllItemsOrganized;
+    }
+
+    public String getMsgErrorOccurred() {
+        return msgErrorOccurred;
+    }
+
+    public String getMsgPlayerOnly() {
+        return msgPlayerOnly;
+    }
 
     /**
      * 发送配置化消息给玩家
-     * @param player 目标玩家
+     * 
+     * @param player  目标玩家
      * @param message 消息内容
      */
     public void sendMessage(Player player, String message) {
@@ -109,8 +177,9 @@ public final class AutoOrganize extends JavaPlugin {
 
     /**
      * 发送带占位符的配置化消息给玩家
-     * @param player 目标玩家
-     * @param message 消息模板
+     * 
+     * @param player       目标玩家
+     * @param message      消息模板
      * @param placeholders 占位符键值对
      */
     public void sendMessage(Player player, String message, String... placeholders) {
@@ -163,15 +232,24 @@ public final class AutoOrganize extends JavaPlugin {
         // 初始化GUI管理器
         this.guiManager = new OrganizeGUIManager(this);
 
-        var cmd = Commands.literal("organize")
+        // 注册展示框交互监听器
+        getServer().getPluginManager().registerEvents(new ItemFrameInteractionListener(this), this);
+
+        // 注册命令
+        var organizeCmd = Commands.literal("organize")
                 .then(Commands.argument("loc", ArgumentTypes.blockPosition())
                         .then(Commands.argument("range", IntegerArgumentType.integer())
                                 .executes(ctx -> {
                                     runCmd(ctx);
                                     return Command.SINGLE_SUCCESS;
                                 })));
+
+        // 注册方块组合体管理命令
+        var blockCombinationCmd = BlockCombinationCommand.buildCommand(this);
+
         getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
-            commands.registrar().register(cmd.build(), "autoorganize");
+            commands.registrar().register(organizeCmd.build(), "organize command");
+            commands.registrar().register(blockCombinationCmd, "block combination management");
         });
     }
 
@@ -230,9 +308,14 @@ public final class AutoOrganize extends JavaPlugin {
         msgOrganizeComplete = getConfig().getString("messages.organize_complete", "");
         msgItemsOrganized = getConfig().getString("messages.items_organized", "");
         msgItemsRemaining = getConfig().getString("messages.items_remaining", "");
+        msgItemsDrop = getConfig().getString("messages.items_drop", "");
         msgAllItemsOrganized = getConfig().getString("messages.all_items_organized", "");
         msgErrorOccurred = getConfig().getString("messages.error_occurred", "");
         msgPlayerOnly = getConfig().getString("messages.player_only", "");
+
+        // 加载方块组合体配置
+        this.blockCombinationConfig = new BlockCombinationConfig();
+        this.blockCombinationConfig.loadFromConfig(getConfig().getConfigurationSection("block_combination"));
 
         getLogger().info("配置已加载 - 每tick扫描方块数: " + blocksPerTick);
     }
@@ -242,4 +325,5 @@ public final class AutoOrganize extends JavaPlugin {
         // Plugin shutdown logic
         getLogger().info("AutoOrganize has been disabled!");
     }
+
 }

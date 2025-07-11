@@ -5,6 +5,19 @@ performance:
   # 每tick扫描的方块数量
   blocks_per_tick: 500
 
+# 方块组合体设置
+block_combination:
+  # 上方方块类型（固定为磁石）
+  top_block: LODESTONE
+  # Y轴搜索半径（固定值）
+  y_radius: 5
+  # 下方方块类型及其对应的检索范围
+  bottom_blocks:
+    DEEPSLATE_EMERALD_ORE: 20
+    NETHERITE_BLOCK: 20
+    DIAMOND_BLOCK: 10
+    GOLD_BLOCK: 5
+
 # 视觉效果设置
 visual_effects:
   # 是否启用物品飞行动画
@@ -16,24 +29,24 @@ visual_effects:
 
 messages:
   # GUI Title
-  gui_title: "§6自动整理 - 放入要整理的物品"
+  gui_title: §6自动整理 - 放入要整理的物品
   # GUI相关消息（设为空则不发送）
-  gui_open: "§a请将需要整理的物品放入界面中，关闭界面后将自动开始整理"
-  gui_start_organizing: "§e开始自动整理物品..."
-  gui_no_items: "§c没有检测到需要整理的物品"
-
+  gui_open: §a请将需要整理的物品放入界面中，关闭界面后将自动开始整理
+  gui_start_organizing: §e开始自动整理物品...
+  gui_no_items: §c没有检测到需要整理的物品
+  
   # 整理过程消息（设为空则不发送）
-  search_containers: "§e开始搜索容器..."
-  containers_found: "§a找到 {count} 个容器，开始整理物品..."
-  no_containers: "§c未找到任何容器，物品已返回背包"
-  organizing_progress: "§e整理进度: {progress}% ({current}/{total})"
-
+  search_containers: §e开始搜索容器...预计需要 §7{estimated_ticks} tick
+  containers_found: §a找到 {count} 个容器，开始整理物品...
+  no_containers: §c未找到任何容器，物品已返回背包
+  organizing_progress: '§e整理进度: {progress}% ({current}/{total})'
+  
   # 完成消息（设为空则不发送）
-  organize_complete: "§a整理完成！"
-  items_organized: "§a已整理物品: {count} 种"
-  items_remaining: "§e剩余物品: {count} 种（已返回背包）"
-  all_items_organized: "§a所有物品都已成功整理！"
-
+  organize_complete: §a整理完成！
+  items_organized: '§a已整理物品: {count} 种'
+  items_remaining: '§e剩余物品: {count} 种（已返回背包）'
+  all_items_organized: §a所有物品都已成功整理！
+  
   # 错误消息（设为空则不发送）
-  error_occurred: "§c整理过程中发生错误，请稍后重试"
-  player_only: "此命令只能由玩家执行"
+  error_occurred: §c整理过程中发生错误，请稍后重试
+  player_only: 此命令只能由玩家执行

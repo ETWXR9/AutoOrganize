@@ -17,9 +17,11 @@ import java.util.*;
  * 整理算法类 - 处理物品分配逻辑
  */
 public class OrganizeAlgorithm {
-    
+
     /**
      * 在指定范围内查找所有容器
+     * 
+     * @deprecated
      */
     public static List<ContainerInfo> findContainers(Entity centerEntity, int range) {
         return findContainers(centerEntity.getLocation(), range);
@@ -27,6 +29,8 @@ public class OrganizeAlgorithm {
 
     /**
      * 在指定范围内查找所有容器（基于位置）
+     * 
+     * @deprecated
      */
     public static List<ContainerInfo> findContainers(Location center, int range) {
         List<ContainerInfo> containers = new ArrayList<>();
@@ -60,36 +64,37 @@ public class OrganizeAlgorithm {
 
         return containers;
     }
-    
+
     /**
      * 检查方块类型是否为容器
      */
     public static boolean isContainerBlock(Material material) {
         return material == Material.CHEST ||
-               material == Material.TRAPPED_CHEST ||
-               material == Material.BARREL ||
-               material == Material.SHULKER_BOX ||
-               material == Material.WHITE_SHULKER_BOX ||
-               material == Material.ORANGE_SHULKER_BOX ||
-               material == Material.MAGENTA_SHULKER_BOX ||
-               material == Material.LIGHT_BLUE_SHULKER_BOX ||
-               material == Material.YELLOW_SHULKER_BOX ||
-               material == Material.LIME_SHULKER_BOX ||
-               material == Material.PINK_SHULKER_BOX ||
-               material == Material.GRAY_SHULKER_BOX ||
-               material == Material.LIGHT_GRAY_SHULKER_BOX ||
-               material == Material.CYAN_SHULKER_BOX ||
-               material == Material.PURPLE_SHULKER_BOX ||
-               material == Material.BLUE_SHULKER_BOX ||
-               material == Material.BROWN_SHULKER_BOX ||
-               material == Material.GREEN_SHULKER_BOX ||
-               material == Material.RED_SHULKER_BOX ||
-               material == Material.BLACK_SHULKER_BOX;
+                material == Material.TRAPPED_CHEST ||
+                material == Material.BARREL ||
+                material == Material.SHULKER_BOX ||
+                material == Material.WHITE_SHULKER_BOX ||
+                material == Material.ORANGE_SHULKER_BOX ||
+                material == Material.MAGENTA_SHULKER_BOX ||
+                material == Material.LIGHT_BLUE_SHULKER_BOX ||
+                material == Material.YELLOW_SHULKER_BOX ||
+                material == Material.LIME_SHULKER_BOX ||
+                material == Material.PINK_SHULKER_BOX ||
+                material == Material.GRAY_SHULKER_BOX ||
+                material == Material.LIGHT_GRAY_SHULKER_BOX ||
+                material == Material.CYAN_SHULKER_BOX ||
+                material == Material.PURPLE_SHULKER_BOX ||
+                material == Material.BLUE_SHULKER_BOX ||
+                material == Material.BROWN_SHULKER_BOX ||
+                material == Material.GREEN_SHULKER_BOX ||
+                material == Material.RED_SHULKER_BOX ||
+                material == Material.BLACK_SHULKER_BOX;
     }
 
     /**
      * 尝试将物品放入匹配的容器中
-     * @param itemStack 要放入的物品
+     * 
+     * @param itemStack  要放入的物品
      * @param containers 可用的容器列表
      * @return 剩余的物品（如果完全放入则返回null）
      */
@@ -99,13 +104,15 @@ public class OrganizeAlgorithm {
 
     /**
      * 尝试将物品放入匹配的容器中（支持CoreProtect记录）
-     * @param itemStack 要放入的物品
+     * 
+     * @param itemStack  要放入的物品
      * @param containers 可用的容器列表
-     * @param player 执行操作的玩家（用于CoreProtect记录）
-     * @param plugin 插件实例（用于获取Hook）
+     * @param player     执行操作的玩家（用于CoreProtect记录）
+     * @param plugin     插件实例（用于获取Hook）
      * @return 剩余的物品（如果完全放入则返回null）
      */
-    public static ItemStack tryPlaceItemInMatchingContainers(ItemStack itemStack, List<ContainerInfo> containers, Player player, AutoOrganize plugin) {
+    public static ItemStack tryPlaceItemInMatchingContainers(ItemStack itemStack, List<ContainerInfo> containers,
+            Player player, AutoOrganize plugin) {
         if (itemStack == null || itemStack.getType() == Material.AIR) {
             return null;
         }
@@ -133,25 +140,29 @@ public class OrganizeAlgorithm {
 
     /**
      * 尝试将物品放入匹配的容器中，并返回放置结果信息（用于视觉效果）
-     * @param itemStack 要放入的物品
-     * @param containers 可用的容器列表
+     * 
+     * @param itemStack      要放入的物品
+     * @param containers     可用的容器列表
      * @param centerLocation 中心位置（用于视觉效果起始点）
      * @return 放置结果信息
      */
-    public static PlacementResult tryPlaceItemWithVisualEffect(ItemStack itemStack, List<ContainerInfo> containers, Location centerLocation) {
+    public static PlacementResult tryPlaceItemWithVisualEffect(ItemStack itemStack, List<ContainerInfo> containers,
+            Location centerLocation) {
         return tryPlaceItemWithVisualEffect(itemStack, containers, centerLocation, null, null);
     }
 
     /**
      * 尝试将物品放入匹配的容器中，并返回放置结果信息（用于视觉效果，支持CoreProtect记录）
-     * @param itemStack 要放入的物品
-     * @param containers 可用的容器列表
+     * 
+     * @param itemStack      要放入的物品
+     * @param containers     可用的容器列表
      * @param centerLocation 中心位置（用于视觉效果起始点）
-     * @param player 执行操作的玩家（用于CoreProtect记录）
-     * @param plugin 插件实例（用于获取Hook）
+     * @param player         执行操作的玩家（用于CoreProtect记录）
+     * @param plugin         插件实例（用于获取Hook）
      * @return 放置结果信息
      */
-    public static PlacementResult tryPlaceItemWithVisualEffect(ItemStack itemStack, List<ContainerInfo> containers, Location centerLocation, Player player, AutoOrganize plugin) {
+    public static PlacementResult tryPlaceItemWithVisualEffect(ItemStack itemStack, List<ContainerInfo> containers,
+            Location centerLocation, Player player, AutoOrganize plugin) {
         if (itemStack == null || itemStack.getType() == Material.AIR) {
             return new PlacementResult(null, null, null);
         }
@@ -160,6 +171,10 @@ public class OrganizeAlgorithm {
 
         // 遍历所有容器，寻找已经包含相同物品类型的容器
         for (ContainerInfo containerInfo : containers) {
+            // 检查方块是否被破坏
+            if (containerInfo.getLocation().getBlock().getType() == Material.AIR) {
+                continue;
+            }
             Inventory inventory = containerInfo.getInventory();
 
             // 检查容器是否已包含相同类型的物品
@@ -215,7 +230,7 @@ public class OrganizeAlgorithm {
             return placedItem != null && placedItem.getAmount() > 0;
         }
     }
-    
+
     /**
      * 检查容器是否包含相同类型的物品
      */
@@ -230,9 +245,10 @@ public class OrganizeAlgorithm {
         }
         return false;
     }
-    
+
     /**
      * 尝试将物品添加到指定的物品栏中
+     * 
      * @param inventory 目标物品栏
      * @param itemStack 要添加的物品
      * @return 剩余的物品（如果完全添加则返回null）
@@ -243,13 +259,15 @@ public class OrganizeAlgorithm {
 
     /**
      * 尝试将物品添加到指定的物品栏中（支持CoreProtect记录）
+     * 
      * @param inventory 目标物品栏
      * @param itemStack 要添加的物品
-     * @param player 执行操作的玩家（用于CoreProtect记录）
-     * @param plugin 插件实例（用于获取Hook）
+     * @param player    执行操作的玩家（用于CoreProtect记录）
+     * @param plugin    插件实例（用于获取Hook）
      * @return 剩余的物品（如果完全添加则返回null）
      */
-    private static ItemStack tryAddItemToInventory(Inventory inventory, ItemStack itemStack, Player player, AutoOrganize plugin) {
+    private static ItemStack tryAddItemToInventory(Inventory inventory, ItemStack itemStack, Player player,
+            AutoOrganize plugin) {
         if (itemStack == null || itemStack.getAmount() <= 0) {
             return null;
         }
@@ -325,40 +343,41 @@ public class OrganizeAlgorithm {
 
         return remaining;
     }
-    
+
     /**
      * 将剩余物品返回给玩家
      */
-    public static void returnItemsToPlayer(Player player, List<ItemStack> remainingItems) {
+    public static void returnItemsToPlayer(Player player, List<ItemStack> remainingItems, AutoOrganize plugin) {
         for (ItemStack item : remainingItems) {
             if (item != null && item.getType() != Material.AIR && item.getAmount() > 0) {
                 // 尝试放入玩家背包
                 HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(item);
-                
+
                 // 背包放不下的物品掉落在玩家脚下
                 for (ItemStack droppedItem : leftover.values()) {
                     player.getWorld().dropItemNaturally(player.getLocation(), droppedItem);
+                    plugin.sendMessage(player, plugin.getMsgItemsDrop());
                 }
             }
         }
     }
-    
+
     /**
      * 容器信息类
      */
     public static class ContainerInfo {
         private final Location location;
         private final Inventory inventory;
-        
+
         public ContainerInfo(Location location, Inventory inventory) {
             this.location = location;
             this.inventory = inventory;
         }
-        
+
         public Location getLocation() {
             return location;
         }
-        
+
         public Inventory getInventory() {
             return inventory;
         }
