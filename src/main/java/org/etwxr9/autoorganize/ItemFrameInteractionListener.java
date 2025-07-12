@@ -25,8 +25,12 @@ public class ItemFrameInteractionListener implements Listener {
     
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-        // 检查是否为右键交互
+        // 检查是否为右键交互，并检查是否为shift
         if (!event.getHand().equals(org.bukkit.inventory.EquipmentSlot.HAND)) {
+            return;
+        }
+        // 检查是否shift
+        if (event.getPlayer().isSneaking()) {
             return;
         }
         
