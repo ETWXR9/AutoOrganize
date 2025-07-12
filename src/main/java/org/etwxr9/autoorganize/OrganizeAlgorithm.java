@@ -348,17 +348,20 @@ public class OrganizeAlgorithm {
      * 将剩余物品返回给玩家
      */
     public static void returnItemsToPlayer(Player player, List<ItemStack> remainingItems, AutoOrganize plugin) {
+        boolean drop = false;
         for (ItemStack item : remainingItems) {
             if (item != null && item.getType() != Material.AIR && item.getAmount() > 0) {
                 // 尝试放入玩家背包
                 HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(item);
-
                 // 背包放不下的物品掉落在玩家脚下
                 for (ItemStack droppedItem : leftover.values()) {
+                    drop = true;
                     player.getWorld().dropItemNaturally(player.getLocation(), droppedItem);
-                    plugin.sendMessage(player, plugin.getMsgItemsDrop());
                 }
             }
+        }
+        if (drop) {
+            plugin.sendMessage(player, plugin.getMsgItemsDrop());
         }
     }
 

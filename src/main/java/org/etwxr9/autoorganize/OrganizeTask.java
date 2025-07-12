@@ -279,9 +279,11 @@ public class OrganizeTask extends BukkitRunnable {
 
         int organizedCount = itemsToOrganize.size() - remainingItems.size();
         int remainingCount = remainingItems.size();
+        if (player.isOnline()) {
+            plugin.sendMessage(player, plugin.getMsgOrganizeComplete());
+        }
         if (remainingCount > 0) {
             if (player.isOnline()) {
-                plugin.sendMessage(player, plugin.getMsgOrganizeComplete());
                 plugin.sendMessage(player, plugin.getMsgItemsOrganized(), "count", String.valueOf(organizedCount));
                 plugin.sendMessage(player, plugin.getMsgItemsRemaining(), "count", String.valueOf(remainingCount));
                 // 返回剩余物品给玩家

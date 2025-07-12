@@ -6,19 +6,50 @@ on:
       - 'v*'
 
 jobs:
-  build:
+  build-and-release:
+    name: Build and Release
+    # 使用最新的稳定版 Ubuntu 运行环境
     runs-on: ubuntu-latest
+    # 授予 job 写入 release 的权限
+    permissions:
+      contents: write
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      # 第一步：检出代码
+      # actions/checkout@v4 会将你的仓库代码下载到运行环境中
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 第二步：设置 Java 环境
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
-      - name: 构建项目
+          java-version: '21'
+          distribution: 'temurin' # 使用 Eclipse Temurin, 一个可靠的 OpenJDK 发行版
+          cache: 'gradle' # 缓存 Gradle 依赖，加快后续构建速度
+
+      # 第三步：让 gradlew 可执行
+      # 这是一个好习惯，防止因权限问题导致构建失败
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # 第四步：构建项目
+      # 运行 gradle build 任务，这会触发 shadowJar 生成最终的 JAR
+      - name: Build with Gradle
         run: ./gradlew build
-      
-      - name: 创建GitHub Release
-        uses: softprops/action-gh-release@v1
+
+      # 第五步：创建 Release 并上传 JAR 文件
+      # 使用一个非常流行的 action 来简化 Release 创建
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          files: build/libs/AutoOrganize-*.jar
+          # files: 是要上传的文件路径，通配符 * 会匹配 build/libs/ 目录下所有 .jar 文件
+          # 确保这个路径和你的 Gradle build 输出路径一致
+          files: build/libs/*.jar
+          
+          # 自动使用 tag 名作为 release 标题
+          name: "Release ${{ github.ref_name }}"
+
+          # 从最近的 Pull Request 和 Commit 自动生成发布说明
+          # 这是一个非常酷的功能，能让你的 changelog 自动化
           generate_release_notes: true
