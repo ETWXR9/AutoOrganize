@@ -36,9 +36,9 @@ messages:
   gui_no_items: 
   
   # 整理过程消息（设为空则不发送）
-  search_containers: §e开始整理，预计需要 §7{estimated_ticks} §etick...
+  search_containers: §e开始整理，范围 §7{range} §e格...
   containers_found: 
-  no_containers: 
+  no_containers: §c未找到任何容器
   organizing_progress: 
   
   # 完成消息（设为空则不发送）

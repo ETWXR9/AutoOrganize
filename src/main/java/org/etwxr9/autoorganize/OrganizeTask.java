@@ -172,12 +172,14 @@ public class OrganizeTask extends BukkitRunnable {
         containers = new ArrayList<>();
         scanInitialized = true;
 
-        // 计算预计tick数并发送消息
+        // 计算预计tick数
         long totalBlocks = (long) (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
         long estimatedTicks = (totalBlocks + BLOCKS_SCAN_PER_TICK - 1) / BLOCKS_SCAN_PER_TICK; // 向上取整
 
         plugin.sendMessage(player,
-                plugin.getMsgSearchContainers().replace("{estimated_ticks}", String.valueOf(estimatedTicks)));
+                plugin.getMsgSearchContainers()
+                        .replace("{estimated_ticks}", String.valueOf(estimatedTicks))
+                        .replace("{range}", String.valueOf(range)));
     }
 
     /**
