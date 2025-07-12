@@ -276,30 +276,27 @@ public class OrganizeTask extends BukkitRunnable {
      * 第三阶段：完成整理
      */
     private void finishOrganizing() {
-        if (player.isOnline()) {
-            int organizedCount = itemsToOrganize.size() - remainingItems.size();
-            int remainingCount = remainingItems.size();
 
-            plugin.sendMessage(player, plugin.getMsgOrganizeComplete());
-            plugin.sendMessage(player, plugin.getMsgItemsOrganized(), "count", String.valueOf(organizedCount));
-
-            if (remainingCount > 0) {
-                if (player.isOnline()) {
-                    plugin.sendMessage(player, plugin.getMsgItemsRemaining(), "count", String.valueOf(remainingCount));
-                    // 返回剩余物品给玩家
-                    OrganizeAlgorithm.returnItemsToPlayer(player, remainingItems, plugin);
-                } else {
-                    plugin.getLogger().info("玩家 " + player.getName() + " 在整理过程中离线，剩余物品将掉落在原地");
-                    for (ItemStack item : remainingItems) {
-                        if (item != null && item.getType() != Material.AIR) {
-                            player.getWorld().dropItemNaturally(player.getLocation(), item);
-                        }
+        int organizedCount = itemsToOrganize.size() - remainingItems.size();
+        int remainingCount = remainingItems.size();
+        if (remainingCount > 0) {
+            if (player.isOnline()) {
+                plugin.sendMessage(player, plugin.getMsgOrganizeComplete());
+                plugin.sendMessage(player, plugin.getMsgItemsOrganized(), "count", String.valueOf(organizedCount));
+                plugin.sendMessage(player, plugin.getMsgItemsRemaining(), "count", String.valueOf(remainingCount));
+                // 返回剩余物品给玩家
+                OrganizeAlgorithm.returnItemsToPlayer(player, remainingItems, plugin);
+            } else {
+                plugin.getLogger().info("玩家 " + player.getName() + " 在整理过程中离线，剩余物品将掉落在原地");
+                for (ItemStack item : remainingItems) {
+                    if (item != null && item.getType() != Material.AIR) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), item);
                     }
                 }
-
-            } else {
-                plugin.sendMessage(player, plugin.getMsgAllItemsOrganized());
             }
+
+        } else {
+            plugin.sendMessage(player, plugin.getMsgAllItemsOrganized());
         }
 
         // 取消任务
