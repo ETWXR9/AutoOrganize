@@ -29,6 +29,7 @@ tasks.withType<JavaCompile> {
 
 
 
+
 tasks.shadowJar {
     archiveBaseName.set("AutoOrganize")
     archiveClassifier.set("")
