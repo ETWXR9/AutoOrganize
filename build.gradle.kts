@@ -17,8 +17,8 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
-    implementation("me.crafter.mc:lockettepro:2.15")
-    implementation("net.coreprotect:coreprotect:22.4")
+    compileOnly("me.crafter.mc:lockettepro:2.15")
+    compileOnly("net.coreprotect:coreprotect:22.4")
 }
 
 tasks.withType<JavaCompile> {
