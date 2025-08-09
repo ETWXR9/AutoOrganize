@@ -4,8 +4,8 @@ plugins {
 }
 
 group = "org.etwxr9"
-version = "1.0-SNAPSHOT"
-val paperJarName = "paper-1.21.1-133.jar" 
+version = "1.1-SNAPSHOT"
+val paperJarName = "paper-1.21.8.jar" 
 
 repositories {
     mavenCentral()
@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
     compileOnly("me.crafter.mc:lockettepro:2.15")
     compileOnly("net.coreprotect:coreprotect:22.4")
 }
