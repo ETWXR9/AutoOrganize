@@ -5,7 +5,7 @@ plugins {
 
 group = "org.etwxr9"
 version = "1.1-SNAPSHOT"
-val paperJarName = "paper-1.21.8.jar" 
+val paperJarName = "paper-1.21.11.jar" 
 
 repositories {
     mavenCentral()
@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("me.crafter.mc:lockettepro:2.15")
     compileOnly("net.coreprotect:coreprotect:22.4")
 }
@@ -81,9 +81,6 @@ tasks.register<JavaExec>("runServer") {
             println("Copied ${pluginFile.name} to ${pluginsDir.path}")
         }
     }
-
-        // 关键在于这一行！
-
     // 将 Gradle 的标准输入（你的键盘输入）重定向到 Paper 服务器进程
     standardInput = System.`in`
     
